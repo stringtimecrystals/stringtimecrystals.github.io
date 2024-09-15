@@ -9,6 +9,9 @@ body {
 
 h1 {
     color: #b8860b; /* Dark Goldenrod for heading */
+    text-align: center;
+    font-size: 60px;
+    margin: 0 0 40px 0;
 }
 
 /* Flexbox container for the form rows to align items vertically */
