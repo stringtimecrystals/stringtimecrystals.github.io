@@ -10,7 +10,7 @@
 <body>
     <h1>Multilingual Presentation</h1>
 
-    <!-- First Line: Display Mode Selection -->
+    <!-- Display Mode Selection -->
     <div id="displayOptions" class="form-row">
         <label for="displayMode">Display: </label>
         <select id="displayMode">
@@ -20,7 +20,7 @@
         </select>
     </div>
 
-    <!-- Second Line: Language Selection -->
+    <!-- Language Selection -->
     <div id="languageSelection" class="form-row">
         <label for="languageSelector1">Language 1: </label>
         <select id="languageSelector1">
@@ -28,57 +28,45 @@
             <option value="pl">Polish</option>
         </select>
 
-        <!-- Second language selection will be hidden dynamically -->
+        <!-- Second Language Selection -->
         <div id="language2Container" style="display: none;">
             <label for="languageSelector2">Language 2 (optional): </label>
             <select id="languageSelector2">
-                <option value="">None</option> <!-- No second language -->
+                <option value="">None</option>
                 <option value="en">English</option>
                 <option value="pl">Polish</option>
             </select>
         </div>
     </div>
 
-    <!-- Search input -->
+    <!-- Search Input -->
     <div class="form-row">
         <label for="searchInput">Search: </label>
         <input type="text" id="searchInput" placeholder="Search in content or spoken...">
     </div>
 
-    <!-- Version filter -->
-    <div class="form-row">
-        <label for="versionFilter">Version: </label>
-        <select id="versionFilter">
-            <option value="">All Versions</option>
-            <option value="1.0">Version 1.0</option>
-            <option value="2.0">Version 2.0</option>
-            <!-- Add more versions if needed -->
-        </select>
-    </div>
-
-    <!-- Part filter -->
+    <!-- Part Filter -->
     <div class="form-row">
         <label for="partFilter">Part: </label>
         <select id="partFilter">
             <option value="">All Parts</option>
-            <option value="Introduction">Introduction</option>
-            <option value="Advanced Topics">Advanced Topics</option>
-            <!-- Add more parts as needed -->
+            <option value="Holistic String Time Crystal Theory">Holistic String Time Crystal Theory</option>
+            <option value="String Time Bose Einstein Condensates Matter">String Time Bose Einstein Condensates Matter</option>
+            <option value="STC and BEC Therapeutic Application in Quantum Feedback">STC and BEC Therapeutic Application in Quantum Feedback</option>
         </select>
     </div>
 
-    <!-- Tags filter -->
+    <!-- Tags Filter -->
     <div class="form-row">
         <label for="tagsFilter">Tags: </label>
-        <select id="tagsFilter" multiple>
-            <option value="introduction">Introduction</option>
-            <option value="basic">Basic</option>
-            <option value="advanced">Advanced</option>
-            <option value="physics">Physics</option>
-            <!-- Add more tags as needed -->
+        <select id="tagsFilter">
+            <option value="">All Tags</option>
+            <option value="sab2024">SAB Conference 2024</option>
+            <option value="monia">For monia</option>
         </select>
     </div>
 
+    <!-- Slides Container -->
     <div id="slidesContainer"></div>
 
     <!-- Include the external JS file containing the slidesData -->
@@ -91,7 +79,6 @@
         const languageSelector2 = document.getElementById('languageSelector2');
         const displayModeSelector = document.getElementById('displayMode');
         const searchInput = document.getElementById('searchInput');
-        const versionFilter = document.getElementById('versionFilter');
         const partFilter = document.getElementById('partFilter');
         const tagsFilter = document.getElementById('tagsFilter');
         const language2Container = document.getElementById('language2Container');
@@ -105,29 +92,25 @@
             }
         }
 
-        function getSelectedTags() {
-            return Array.from(tagsFilter.selectedOptions).map(option => option.value);
-        }
-
-        function displaySlides(language1, language2, displayMode, searchText = '', version = '', part = '', tags = []) {
+        function displaySlides(language1, language2, displayMode, searchText = '', part = '', tags = '') {
             slidesContainer.innerHTML = ''; // Clear existing slides
 
             const isTwoLanguages = language2 && displayMode !== 'both'; // Only content/spoken with two languages
             const isSingleLanguageWithBoth = !language2 && displayMode === 'both'; // Content and spoken for one language
+
+            // Set the layout class based on the mode
+            slidesContainer.className = isSingleLanguageWithBoth ? 'triple' : isTwoLanguages ? 'double' : 'single';
 
             slidesData.forEach(slide => {
                 const slideDataLang1 = slide.languages[language1];
                 const slideDataLang2 = slide.languages[language2];
                 const slideDataEn = slide.languages['en']; // Fallback to English for images
 
-                // Check if the slide matches the selected version
-                if (version && slide.version !== version) return;
-
                 // Check if the slide matches the selected part
                 if (part && slide.part !== part) return;
 
-                // Check if the slide matches the selected tags
-                if (tags.length > 0 && !tags.some(tag => slide.tags.includes(tag))) return;
+                // Check if the slide contains the selected tag
+                if (tags && !slide.tags.includes(tags)) return;
 
                 // Check if the language has content
                 if (!slideDataLang1) return;
@@ -169,7 +152,7 @@
                     spokenElement.innerHTML = `<h2>Spoken</h2>${spokenText1}`;
                     slideElement.appendChild(spokenElement);
                 }
-                // Case 2: Two lanksguages side by side with only content or spoken
+                // Case 2: Two languages side by side with only content or spoken
                 else if (isTwoLanguages) {
                     const contentElement1 = document.createElement('div');
                     contentElement1.classList.add('slide-content');
@@ -199,33 +182,28 @@
 
         // Change language or display mode
         languageSelector1.addEventListener('change', () => {
-            displaySlides(languageSelector1.value, languageSelector2.value, displayModeSelector.value, searchInput.value, versionFilter.value, partFilter.value, getSelectedTags());
+            displaySlides(languageSelector1.value, languageSelector2.value, displayModeSelector.value, searchInput.value, partFilter.value, tagsFilter.value);
         });
         languageSelector2.addEventListener('change', () => {
-            displaySlides(languageSelector1.value, languageSelector2.value, displayModeSelector.value, searchInput.value, versionFilter.value, partFilter.value, getSelectedTags());
+            displaySlides(languageSelector1.value, languageSelector2.value, displayModeSelector.value, searchInput.value, partFilter.value, tagsFilter.value);
         });
         displayModeSelector.addEventListener('change', () => {
             toggleLanguageOptions(); // Toggle language options based on the selected mode
-            displaySlides(languageSelector1.value, languageSelector2.value, displayModeSelector.value, searchInput.value, versionFilter.value, partFilter.value, getSelectedTags());
+            displaySlides(languageSelector1.value, languageSelector2.value, displayModeSelector.value, searchInput.value, partFilter.value, tagsFilter.value);
         });
 
         // Search input event listener
         searchInput.addEventListener('input', () => {
-            displaySlides(languageSelector1.value, languageSelector2.value, displayModeSelector.value, searchInput.value, versionFilter.value, partFilter.value, getSelectedTags());
+            displaySlides(languageSelector1.value, languageSelector2.value, displayModeSelector.value, searchInput.value, partFilter.value, tagsFilter.value);
         });
 
-        // Version and Part filter event listeners
-        versionFilter.addEventListener('change', () => {
-            displaySlides(languageSelector1.value, languageSelector2.value, displayModeSelector.value, searchInput.value, versionFilter.value, partFilter.value, getSelectedTags());
-        });
-
+        // Part and Tags filter event listeners
         partFilter.addEventListener('change', () => {
-            displaySlides(languageSelector1.value, languageSelector2.value, displayModeSelector.value, searchInput.value, versionFilter.value, partFilter.value, getSelectedTags());
+            displaySlides(languageSelector1.value, languageSelector2.value, displayModeSelector.value, searchInput.value, partFilter.value, tagsFilter.value);
         });
 
-        // Tags filter event listener
         tagsFilter.addEventListener('change', () => {
-            displaySlides(languageSelector1.value, languageSelector2.value, displayModeSelector.value, searchInput.value, versionFilter.value, partFilter.value, getSelectedTags());
+            displaySlides(languageSelector1.value, languageSelector2.value, displayModeSelector.value, searchInput.value, partFilter.value, tagsFilter.value);
         });
     </script>
 </body>

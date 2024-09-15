@@ -2,7 +2,7 @@ const slidesData = [
     {
       id: 1,
       part: "Holistic String Time Crystal Theory",
-      tags: ["SAB Conference 2024", "For Monia"],
+      tags: ["sab2024", "monia"],
       languages: {
         en: {
           image: "images/time_crystal_holo.gif",
@@ -19,8 +19,8 @@ const slidesData = [
     },
     {
       id: 2,
-      part: "Holistic String Time Crystal Theory",
-      tags: ["For Monia"],
+      part: "String Time Bose Einstein Condensates Matter",
+      tags: ["monia"],
       languages: {
         en: {
           image: "https://via.placeholder.com/200",
