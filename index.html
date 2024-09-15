@@ -45,6 +45,40 @@
         <input type="text" id="searchInput" placeholder="Search in content or spoken...">
     </div>
 
+    <!-- Version filter -->
+    <div class="form-row">
+        <label for="versionFilter">Version: </label>
+        <select id="versionFilter">
+            <option value="">All Versions</option>
+            <option value="1.0">Version 1.0</option>
+            <option value="2.0">Version 2.0</option>
+            <!-- Add more versions if needed -->
+        </select>
+    </div>
+
+    <!-- Part filter -->
+    <div class="form-row">
+        <label for="partFilter">Part: </label>
+        <select id="partFilter">
+            <option value="">All Parts</option>
+            <option value="Introduction">Introduction</option>
+            <option value="Advanced Topics">Advanced Topics</option>
+            <!-- Add more parts as needed -->
+        </select>
+    </div>
+
+    <!-- Tags filter -->
+    <div class="form-row">
+        <label for="tagsFilter">Tags: </label>
+        <select id="tagsFilter" multiple>
+            <option value="introduction">Introduction</option>
+            <option value="basic">Basic</option>
+            <option value="advanced">Advanced</option>
+            <option value="physics">Physics</option>
+            <!-- Add more tags as needed -->
+        </select>
+    </div>
+
     <div id="slidesContainer"></div>
 
     <!-- Include the external JS file containing the slidesData -->
@@ -57,6 +91,9 @@
         const languageSelector2 = document.getElementById('languageSelector2');
         const displayModeSelector = document.getElementById('displayMode');
         const searchInput = document.getElementById('searchInput');
+        const versionFilter = document.getElementById('versionFilter');
+        const partFilter = document.getElementById('partFilter');
+        const tagsFilter = document.getElementById('tagsFilter');
         const language2Container = document.getElementById('language2Container');
 
         function toggleLanguageOptions() {
@@ -68,20 +105,29 @@
             }
         }
 
-        function displaySlides(language1, language2, displayMode, searchText = '') {
+        function getSelectedTags() {
+            return Array.from(tagsFilter.selectedOptions).map(option => option.value);
+        }
+
+        function displaySlides(language1, language2, displayMode, searchText = '', version = '', part = '', tags = []) {
             slidesContainer.innerHTML = ''; // Clear existing slides
 
-            const isTwoLanguages = language2 && displayMode !== 'both'; // Two languages, content or spoken
+            const isTwoLanguages = language2 && displayMode !== 'both'; // Only content/spoken with two languages
             const isSingleLanguageWithBoth = !language2 && displayMode === 'both'; // Content and spoken for one language
-
-            // Set the layout class based on the mode
-            slidesContainer.className = isSingleLanguageWithBoth ? 'triple' : isTwoLanguages ? 'double' : 'single';
-
 
             slidesData.forEach(slide => {
                 const slideDataLang1 = slide.languages[language1];
                 const slideDataLang2 = slide.languages[language2];
                 const slideDataEn = slide.languages['en']; // Fallback to English for images
+
+                // Check if the slide matches the selected version
+                if (version && slide.version !== version) return;
+
+                // Check if the slide matches the selected part
+                if (part && slide.part !== part) return;
+
+                // Check if the slide matches the selected tags
+                if (tags.length > 0 && !tags.some(tag => slide.tags.includes(tag))) return;
 
                 // Check if the language has content
                 if (!slideDataLang1) return;
@@ -123,7 +169,7 @@
                     spokenElement.innerHTML = `<h2>Spoken</h2>${spokenText1}`;
                     slideElement.appendChild(spokenElement);
                 }
-                // Case 2: Two languages side by side with only content or spoken
+                // Case 2: Two lanksguages side by side with only content or spoken
                 else if (isTwoLanguages) {
                     const contentElement1 = document.createElement('div');
                     contentElement1.classList.add('slide-content');
@@ -153,19 +199,33 @@
 
         // Change language or display mode
         languageSelector1.addEventListener('change', () => {
-            displaySlides(languageSelector1.value, languageSelector2.value, displayModeSelector.value, searchInput.value);
+            displaySlides(languageSelector1.value, languageSelector2.value, displayModeSelector.value, searchInput.value, versionFilter.value, partFilter.value, getSelectedTags());
         });
         languageSelector2.addEventListener('change', () => {
-            displaySlides(languageSelector1.value, languageSelector2.value, displayModeSelector.value, searchInput.value);
+            displaySlides(languageSelector1.value, languageSelector2.value, displayModeSelector.value, searchInput.value, versionFilter.value, partFilter.value, getSelectedTags());
         });
         displayModeSelector.addEventListener('change', () => {
             toggleLanguageOptions(); // Toggle language options based on the selected mode
-            displaySlides(languageSelector1.value, languageSelector2.value, displayModeSelector.value, searchInput.value);
+            displaySlides(languageSelector1.value, languageSelector2.value, displayModeSelector.value, searchInput.value, versionFilter.value, partFilter.value, getSelectedTags());
         });
 
         // Search input event listener
         searchInput.addEventListener('input', () => {
-            displaySlides(languageSelector1.value, languageSelector2.value, displayModeSelector.value, searchInput.value);
+            displaySlides(languageSelector1.value, languageSelector2.value, displayModeSelector.value, searchInput.value, versionFilter.value, partFilter.value, getSelectedTags());
+        });
+
+        // Version and Part filter event listeners
+        versionFilter.addEventListener('change', () => {
+            displaySlides(languageSelector1.value, languageSelector2.value, displayModeSelector.value, searchInput.value, versionFilter.value, partFilter.value, getSelectedTags());
+        });
+
+        partFilter.addEventListener('change', () => {
+            displaySlides(languageSelector1.value, languageSelector2.value, displayModeSelector.value, searchInput.value, versionFilter.value, partFilter.value, getSelectedTags());
+        });
+
+        // Tags filter event listener
+        tagsFilter.addEventListener('change', () => {
+            displaySlides(languageSelector1.value, languageSelector2.value, displayModeSelector.value, searchInput.value, versionFilter.value, partFilter.value, getSelectedTags());
         });
     </script>
 </body>

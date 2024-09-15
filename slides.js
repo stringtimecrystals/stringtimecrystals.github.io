@@ -1,6 +1,8 @@
 const slidesData = [
     {
       id: 1,
+      part: "Holistic String Time Crystal Theory",
+      tags: ["SAB Conference 2024", "For Monia"],
       languages: {
         en: {
           image: "images/time_crystal_holo.gif",
@@ -17,6 +19,8 @@ const slidesData = [
     },
     {
       id: 2,
+      part: "Holistic String Time Crystal Theory",
+      tags: ["For Monia"],
       languages: {
         en: {
           image: "https://via.placeholder.com/200",
