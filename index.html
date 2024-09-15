@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multilingual Presentation</title>
+
+    <link id="css-styles" rel="stylesheet" href="styles.css?v=1.0">
+</head>
+<body>
+    <h1>Multilingual Presentation</h1>
+
+    <!-- First Line: Display Mode Selection -->
+    <div id="displayOptions" class="form-row">
+        <label for="displayMode">Display: </label>
+        <select id="displayMode">
+            <option value="content">Content Only</option>
+            <option value="spoken">Spoken Only</option>
+            <option value="both">Content and Spoken (One Language)</option>
+        </select>
+    </div>
+
+    <!-- Second Line: Language Selection -->
+    <div id="languageSelection" class="form-row">
+        <label for="languageSelector1">Language 1: </label>
+        <select id="languageSelector1">
+            <option value="en">English</option>
+            <option value="pl">Polish</option>
+        </select>
+
+        <!-- Second language selection will be hidden dynamically -->
+        <div id="language2Container" style="display: none;">
+            <label for="languageSelector2">Language 2 (optional): </label>
+            <select id="languageSelector2">
+                <option value="">None</option> <!-- No second language -->
+                <option value="en">English</option>
+                <option value="pl">Polish</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Search input -->
+    <div class="form-row">
+        <label for="searchInput">Search: </label>
+        <input type="text" id="searchInput" placeholder="Search in content or spoken...">
+    </div>
+
+    <div id="slidesContainer"></div>
+
+    <!-- Include the external JS file containing the slidesData -->
+    <script src="slides.js"></script>
+
+    <!-- Inline JavaScript for rendering the slides and handling display mode -->
+    <script>
+        const slidesContainer = document.getElementById('slidesContainer');
+        const languageSelector1 = document.getElementById('languageSelector1');
+        const languageSelector2 = document.getElementById('languageSelector2');
+        const displayModeSelector = document.getElementById('displayMode');
+        const searchInput = document.getElementById('searchInput');
+        const language2Container = document.getElementById('language2Container');
+
+        function toggleLanguageOptions() {
+            if (displayModeSelector.value === 'both') {
+                language2Container.style.display = 'none'; // Hide second language selection
+                languageSelector2.value = ''; // Reset the second language selection
+            } else {
+                language2Container.style.display = 'inline-block'; // Show second language selection
+            }
+        }
+
+        function displaySlides(language1, language2, displayMode, searchText = '') {
+            slidesContainer.innerHTML = ''; // Clear existing slides
+
+            const isTwoLanguages = language2 && displayMode !== 'both'; // Two languages, content or spoken
+            const isSingleLanguageWithBoth = !language2 && displayMode === 'both'; // Content and spoken for one language
+
+            // Set the layout class based on the mode
+            slidesContainer.className = isSingleLanguageWithBoth ? 'triple' : isTwoLanguages ? 'double' : 'single';
+
+
+            slidesData.forEach(slide => {
+                const slideDataLang1 = slide.languages[language1];
+                const slideDataLang2 = slide.languages[language2];
+                const slideDataEn = slide.languages['en']; // Fallback to English for images
+
+                // Check if the language has content
+                if (!slideDataLang1) return;
+
+                // Get the slide content and spoken
+                const contentText1 = slideDataLang1?.content || '';
+                const spokenText1 = slideDataLang1?.spoken || '';
+                const contentText2 = slideDataLang2?.content || '';
+                const spokenText2 = slideDataLang2?.spoken || '';
+
+                // Check if the search text is found in content or spoken
+                const foundInContentOrSpoken = contentText1.includes(searchText) || spokenText1.includes(searchText) || contentText2.includes(searchText) || spokenText2.includes(searchText);
+
+                // Skip slide if searchText is not found
+                if (searchText && !foundInContentOrSpoken) {
+                    return;
+                }
+
+                const slideElement = document.createElement('div');
+                slideElement.classList.add('slide');
+
+                // Use English image if the selected language's image is missing
+                const imgSrc = slideDataLang1?.image || slideDataEn?.image;
+
+                const imgElement = document.createElement('img');
+                imgElement.src = imgSrc || ''; // Ensure a fallback to an empty string if both are missing
+
+                slideElement.appendChild(imgElement);
+
+                // Case 1: One language with both content and spoken
+                if (isSingleLanguageWithBoth) {
+                    const contentElement = document.createElement('div');
+                    contentElement.classList.add('slide-content');
+                    contentElement.innerHTML = `<h2>${slideDataLang1.title}</h2>${contentText1}`;
+                    slideElement.appendChild(contentElement);
+
+                    const spokenElement = document.createElement('div');
+                    spokenElement.classList.add('slide-content');
+                    spokenElement.innerHTML = `<h2>Spoken</h2>${spokenText1}`;
+                    slideElement.appendChild(spokenElement);
+                }
+                // Case 2: Two languages side by side with only content or spoken
+                else if (isTwoLanguages) {
+                    const contentElement1 = document.createElement('div');
+                    contentElement1.classList.add('slide-content');
+                    contentElement1.innerHTML = `<h2>${slideDataLang1.title}</h2>${slideDataLang1[displayMode]}`;
+                    slideElement.appendChild(contentElement1);
+
+                    const contentElement2 = document.createElement('div');
+                    contentElement2.classList.add('slide-content');
+                    contentElement2.innerHTML = `<h2>${slideDataLang2.title}</h2>${slideDataLang2[displayMode]}`;
+                    slideElement.appendChild(contentElement2);
+                }
+                // Case 3: One language with either content or spoken
+                else {
+                    const contentElement = document.createElement('div');
+                    contentElement.classList.add('slide-content');
+                    contentElement.innerHTML = `<h2>${slideDataLang1.title}</h2>${slideDataLang1[displayMode]}`;
+                    slideElement.appendChild(contentElement);
+                }
+
+                slidesContainer.appendChild(slideElement);
+            });
+        }
+
+        // Initial load
+        toggleLanguageOptions(); // Adjust the second language option visibility on load
+        displaySlides(languageSelector1.value, languageSelector2.value, displayModeSelector.value);
+
+        // Change language or display mode
+        languageSelector1.addEventListener('change', () => {
+            displaySlides(languageSelector1.value, languageSelector2.value, displayModeSelector.value, searchInput.value);
+        });
+        languageSelector2.addEventListener('change', () => {
+            displaySlides(languageSelector1.value, languageSelector2.value, displayModeSelector.value, searchInput.value);
+        });
+        displayModeSelector.addEventListener('change', () => {
+            toggleLanguageOptions(); // Toggle language options based on the selected mode
+            displaySlides(languageSelector1.value, languageSelector2.value, displayModeSelector.value, searchInput.value);
+        });
+
+        // Search input event listener
+        searchInput.addEventListener('input', () => {
+            displaySlides(languageSelector1.value, languageSelector2.value, displayModeSelector.value, searchInput.value);
+        });
+    </script>
+</body>
+</html>
